@@ -1,7 +1,7 @@
 import os
 from ctypes import *
-import lib
 import lib.constants
+from lib.structs import retro_system_info
 
 cmd_names = { v: k for k, v in vars(lib.constants).items() if isinstance(v, int) }
 
@@ -15,6 +15,13 @@ def set_environment(cmd, data):
     
     if cmd == lib.constants.RETRO_ENVIRONMENT_GET_CAN_DUPE:
         cast(data, POINTER(c_ubyte))[0] = 1
+        return c_bool(True)
+    
+    if cmd == lib.constants.RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY or cmd == lib.constants.RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
+        buffer = create_string_buffer(b'.')
+        pointer = cast(data, POINTER(c_void_p))
+        pointer[0] = cast(buffer, c_void_p)
+
         return c_bool(True)
 
     return c_bool(True)
@@ -47,3 +54,11 @@ dll.retro_set_input_state(set_input_state)
 dll.retro_set_audio_sample(set_audio_sample)
 dll.retro_set_audio_sample_batch(set_audio_sample_batch)
 dll.retro_init()
+
+print('Core loaded')
+
+system_info = retro_system_info()
+
+dll.retro_get_system_info(POINTER(retro_system_info)(system_info))
+
+print('retro_get_system_info called!')
