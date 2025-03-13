@@ -9,8 +9,15 @@ class retro_system_info(Structure):
         ('block_extract', c_bool),
     ]
 
-
 class retro_log_callback(Structure):
     _fields_ = [
         ('log', CFUNCTYPE(None, c_uint, c_char_p)),
+    ]
+
+class retro_game_info(Structure):
+    _fields_ = [
+        ('path', c_char_p),
+        ('data', c_void_p),
+        ('size', c_size_t),
+        ('meta', c_char_p),
     ]
