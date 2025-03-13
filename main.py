@@ -1,9 +1,16 @@
 import os
 from ctypes import *
 import lib.constants
-from lib.structs import retro_system_info
+from lib.structs import retro_log_callback, retro_system_info
 
 cmd_names = { v: k for k, v in vars(lib.constants).items() if isinstance(v, int) }
+
+def log(level, message):
+    print('log called')
+    print(level, message)
+    pass
+
+log_ptr = CFUNCTYPE(None, c_uint, c_char_p)(log)
 
 @CFUNCTYPE(c_bool, c_uint, c_void_p)
 def set_environment(cmd, data):
@@ -11,7 +18,9 @@ def set_environment(cmd, data):
     print(f'set_environment: {cmd_name}')
 
     if cmd == lib.constants.RETRO_ENVIRONMENT_GET_LOG_INTERFACE:
-        return c_bool(False)
+        pointer = cast(data, POINTER(retro_log_callback))
+        pointer.contents.log = log_ptr
+        return c_bool(True)
     
     if cmd == lib.constants.RETRO_ENVIRONMENT_GET_CAN_DUPE:
         cast(data, POINTER(c_ubyte))[0] = 1

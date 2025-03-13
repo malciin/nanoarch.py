@@ -8,3 +8,9 @@ class retro_system_info(Structure):
         ('need_fullpath', c_bool),
         ('block_extract', c_bool),
     ]
+
+
+class retro_log_callback(Structure):
+    _fields_ = [
+        ('log', CFUNCTYPE(None, c_uint, c_char_p)),
+    ]
