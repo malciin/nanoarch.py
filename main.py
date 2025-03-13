@@ -1,9 +1,22 @@
 import os
 from ctypes import *
+import lib
+import lib.constants
+
+cmd_names = { v: k for k, v in vars(lib.constants).items() if isinstance(v, int) }
 
 @CFUNCTYPE(c_bool, c_uint, c_void_p)
 def set_environment(cmd, data):
-    print('set_environment', cmd, data)
+    cmd_name = cmd_names[cmd] if cmd in cmd_names else f'Unknown: {cmd}'
+    print(f'set_environment: {cmd_name}')
+
+    if cmd == lib.constants.RETRO_ENVIRONMENT_GET_LOG_INTERFACE:
+        return c_bool(False)
+    
+    if cmd == lib.constants.RETRO_ENVIRONMENT_GET_CAN_DUPE:
+        cast(data, POINTER(c_ubyte))[0] = 1
+        return c_bool(True)
+
     return c_bool(True)
 
 @CFUNCTYPE(None, c_void_p, c_uint, c_uint, c_byte)
