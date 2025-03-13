@@ -3,6 +3,7 @@ import lib.constants
 import time
 
 from ctypes import *
+from lib.enums import retro_pixel_format
 from lib.structs import retro_game_info, retro_log_callback, retro_system_info
 
 cmd_names = { v: k for k, v in vars(lib.constants).items() if isinstance(v, int) }
@@ -17,7 +18,7 @@ def log(level, message):
 
 @CFUNCTYPE(c_bool, c_uint, c_void_p)
 def set_environment(cmd, data):
-    cmd_name = cmd_names[cmd] if cmd in cmd_names else f'Unknown: {cmd}'
+    # cmd_name = cmd_names[cmd] if cmd in cmd_names else f'Unknown: {cmd}'
     # print(f'set_environment: {cmd_name}')
 
     if cmd == lib.constants.RETRO_ENVIRONMENT_GET_LOG_INTERFACE:
@@ -29,6 +30,22 @@ def set_environment(cmd, data):
         cast(data, POINTER(c_ubyte))[0] = 1
         return c_bool(True)
     
+    if cmd == lib.constants.RETRO_ENVIRONMENT_SET_PIXEL_FORMAT:
+        format = cast(data, POINTER(c_uint))[0]
+
+        if format == retro_pixel_format.RETRO_PIXEL_FORMAT_0RGB1555:
+            print(f'Pixel format not yet implemented: {format}')
+            return c_bool(False)
+        elif format == retro_pixel_format.RETRO_PIXEL_FORMAT_XRGB8888:
+            print(f'Pixel format set to XRGB8888')
+            return c_bool(True)
+        elif format == retro_pixel_format.RETRO_PIXEL_FORMAT_RGB565:
+            print(f'Pixel format not yet implemented: {format}')
+            return c_bool(False)
+        else:
+            print(f'Invalid pixel format: {format}')
+            return c_bool(False)
+
     if cmd == lib.constants.RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY or cmd == lib.constants.RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
         buffer = create_string_buffer(b'.')
         pointer = cast(data, POINTER(c_void_p))
@@ -38,10 +55,17 @@ def set_environment(cmd, data):
 
     return c_bool(True)
 
-@CFUNCTYPE(None, c_void_p, c_uint, c_uint, c_byte)
+@CFUNCTYPE(None, c_void_p, c_uint, c_uint, c_size_t)
 def set_video_refresh(data, width, height, pitch):
-    # print('set_video_refresh')
-    pass
+    # ffmpeg -y -f rawvideo -pixel_format rgb555le -video_size 160x144 -i imgbuffer.raw -frames:v 1 output.png
+    # with open('imgbuffer.raw', "wb") as f:
+    #     data_ptr = cast(data, POINTER(c_ubyte))  # Cast void* to byte pointer
+    #     for y in range(height):
+    #         row_offset = y * pitch  # Move to the correct row
+    #         f.write(bytearray(data_ptr[row_offset: row_offset + (width * 4)]))  # Write only valid pixel data
+    data_ptr = cast(data, POINTER(c_ubyte))  # Cast void* to byte pointer
+    with open('imgbuffer.raw', 'wb') as f:
+        f.write(bytearray(data_ptr[0:width * height * 4]))
 
 @CFUNCTYPE(None)
 def set_input_poll():
@@ -100,7 +124,7 @@ start_time = time.time()
 interval = 1 # displays the frame rate every 1 second
 counter = 0
 
-for i in range(60 * 10000):
+for i in range(1000):
     dll.retro_run()
     counter+=1
     if (time.time() - start_time) > interval:
