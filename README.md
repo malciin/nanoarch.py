@@ -31,6 +31,8 @@ Run `main.py`
   | ENTER | START |
   | BACKSPACE | SELECT |
 
+- inmemory state serialization (`S` key) & deserialization (`D` key).
+
 ### Whats not working
 
 - Support for cores other than Game Boy due to hardcoded resolution, pixel format & controls (easy to modify - call `retro_get_system_av_info` and use its information)

@@ -154,6 +154,9 @@ if dll.retro_load_game(POINTER(retro_game_info)(game_info)) == 0:
     print('Failed to load game!')
     exit(1)
 
+state_size = dll.retro_serialize_size()
+state = bytes(state_size)
+print('State size:', state_size)
 running = True
 
 while running:
@@ -168,6 +171,17 @@ while running:
             if event.key.keysym.scancode not in pressed_scancodes:
                 pressed_scancodes.add(event.key.keysym.scancode)
                 print('Detected new keypress:', scancodes[event.key.keysym.scancode])
+
+                if event.key.keysym.scancode == sdl2.SDL_SCANCODE_S:
+                    if dll.retro_serialize(state, state_size):
+                        print('State serialized')
+                    else:
+                        print('Failed to serialize state')
+                if event.key.keysym.scancode == sdl2.SDL_SCANCODE_D:
+                    if dll.retro_unserialize(state, state_size):
+                        print('State unserialized successfully')
+                    else:
+                        print('Failed to unserialize state')
 
     dll.retro_run()
 
