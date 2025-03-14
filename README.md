@@ -2,6 +2,8 @@
 
 A minimal working example of using a libretro core in Python based on <a href="https://github.com/heuripedes/nanoarch/blob/master/nanoarch.c">nanoarch.c</a>.
 
+<img src="./result.gif" />
+
 ### How to run
 
 (tested on windows, linux would require slight changes - .dll -> .so etc)
