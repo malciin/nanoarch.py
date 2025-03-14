@@ -122,10 +122,15 @@ if dll.retro_load_game(POINTER(retro_game_info)(game_info)) == 0:
     print('Failed to load game!')
     exit(1)
 
-for i in range(1000):
+running = True
+
+while running:
+    for event in sdl2.ext.get_events():
+        if event.type == sdl2.SDL_QUIT:
+            running = False
+
     dll.retro_run()
 
     sdl2.SDL_RenderCopy(renderer, texture, None, None)
     sdl2.SDL_RenderPresent(renderer)
-
-print('Done!')
+    sdl2.SDL_Delay(20)
