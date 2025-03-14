@@ -18,10 +18,22 @@ Run `main.py`
 
 - initializing libretro
 - rendering gameboy frames inside SDL2 as a texture
+- inputs for gameboy:
+
+  | Keyboard | Gameboy |
+  |----------|---------|
+  | Left | Dpad Left |
+  | Right | Dpad Right |
+  | Up | Dpad Up |
+  | Down | Dpad Down |
+  | Z | A |
+  | X | B |
+  | ENTER | START |
+  | BACKSPACE | SELECT |
 
 ### Whats not working
 
-- Support for cores other than Game Boy due to hardcoded resolution & pixel format (easy to modify - call `retro_get_system_av_info` and use its information)
+- Support for cores other than Game Boy due to hardcoded resolution, pixel format & controls (easy to modify - call `retro_get_system_av_info` and use its information)
 
 - Audio
 

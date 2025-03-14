@@ -14,6 +14,7 @@ rom = 'demo.gb' # Source of demo.gb rom: https://buildbot.libretro.com/assets/co
 ###
 
 cmd_names = { v: k for k, v in vars(lib.constants).items() if isinstance(v, int) }
+scancodes = { v: k for k, v in vars(sdl2.scancode).items() if isinstance(v, int) }
 base_dir = os.path.dirname(__file__)
 
 sdl2.ext.init()
@@ -21,6 +22,20 @@ window = sdl2.ext.Window("nanoarch.py", size=window_size)
 window.show()
 renderer = sdl2.SDL_CreateRenderer(window.window, -1, sdl2.SDL_RENDERER_ACCELERATED)
 texture = sdl2.SDL_CreateTexture(renderer, sdl2.SDL_PIXELFORMAT_ARGB8888, sdl2.SDL_TEXTUREACCESS_STREAMING, window_size[0], window_size[1])
+
+pressed_scancodes: set[sdl2.SDL_Scancode] = set()
+
+sdl2_scancode_to_joypad = {
+    sdl2.SDL_SCANCODE_LEFT: lib.constants.RETRO_DEVICE_ID_JOYPAD_LEFT,
+    sdl2.SDL_SCANCODE_RIGHT: lib.constants.RETRO_DEVICE_ID_JOYPAD_RIGHT,
+    sdl2.SDL_SCANCODE_UP: lib.constants.RETRO_DEVICE_ID_JOYPAD_UP,
+    sdl2.SDL_SCANCODE_DOWN: lib.constants.RETRO_DEVICE_ID_JOYPAD_DOWN,
+    sdl2.SDL_SCANCODE_Z: lib.constants.RETRO_DEVICE_ID_JOYPAD_A,
+    sdl2.SDL_SCANCODE_X: lib.constants.RETRO_DEVICE_ID_JOYPAD_B,
+    sdl2.SDL_SCANCODE_RETURN: lib.constants.RETRO_DEVICE_ID_JOYPAD_START,
+    sdl2.SDL_SCANCODE_BACKSPACE: lib.constants.RETRO_DEVICE_ID_JOYPAD_SELECT,
+}
+joypad_to_sdl2_scancode = { v: k for k, v in sdl2_scancode_to_joypad.items() }
 
 # Todo: to use python logs callback variadic arguments needs to be handled somehow
 # https://cffi.readthedocs.io/en/stable/using.html#id27
@@ -85,6 +100,23 @@ def set_input_poll():
 
 @CFUNCTYPE(c_int16, c_uint, c_uint, c_uint, c_uint)
 def set_input_state(port, device, index, id):
+    if port != 0:
+        print('Another player unsupported')
+        return 0
+    
+    if device != lib.constants.RETRO_DEVICE_JOYPAD:
+        print('Unsupported device:', cmd_names[device])
+        return 0
+
+    if id == lib.constants.RETRO_DEVICE_ID_JOYPAD_MASK:
+        mask = 0
+        for code in pressed_scancodes:
+            if code in sdl2_scancode_to_joypad:
+                mask |= 1 << sdl2_scancode_to_joypad[code]
+        return mask
+
+    if id in joypad_to_sdl2_scancode:
+        return 1 if joypad_to_sdl2_scancode[id] in pressed_scancodes else 0
     return 0
 
 @CFUNCTYPE(None, c_short, c_short)
@@ -128,6 +160,14 @@ while running:
     for event in sdl2.ext.get_events():
         if event.type == sdl2.SDL_QUIT:
             running = False
+        if event.type == sdl2.SDL_KEYUP:
+            if event.key.keysym.scancode in pressed_scancodes:
+                pressed_scancodes.remove(event.key.keysym.scancode)
+                print('Detected previous pressed key release:', scancodes[event.key.keysym.scancode])
+        if event.type == sdl2.SDL_KEYDOWN:
+            if event.key.keysym.scancode not in pressed_scancodes:
+                pressed_scancodes.add(event.key.keysym.scancode)
+                print('Detected new keypress:', scancodes[event.key.keysym.scancode])
 
     dll.retro_run()
 
