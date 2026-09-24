@@ -6,11 +6,16 @@ A minimal working example of using a libretro core in Python based on <a href="h
 
 ### How to run
 
-(tested on windows, linux would require slight changes - .dll -> .so etc)
-
 Install requirements from `requirements.txt` (`pip install -r requirements.txt`)
 
-Fetch `sameboy_librertro` core from https://buildbot.libretro.com/nightly/windows/x86_64/latest/sameboy_libretro.dll.zip and extract it inside the same directory as main.py
+Fetch `sameboy_librertro` core:
+
+| System | |
+| -------- | ------- |
+| Linux | https://buildbot.libretro.com/nightly/linux/x86_64/latest/sameboy_libretro.so.zip |
+| Windows | https://buildbot.libretro.com/nightly/windows/x86_64/latest/sameboy_libretro.dll.zip |
+
+Extract it inside the same directory as main.py
 
 Run `main.py`
 

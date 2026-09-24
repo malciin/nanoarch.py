@@ -1,4 +1,5 @@
 __pycache__
 *.dll
+*.so
 *.gb
 !demo.gb

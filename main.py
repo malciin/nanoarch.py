@@ -1,4 +1,5 @@
 import os
+import sys
 import lib.constants
 import sdl2
 import sdl2.ext
@@ -9,7 +10,7 @@ from lib.structs import retro_game_info, retro_log_callback, retro_system_info
 
 ### Configuration
 window_size = (160, 144)
-core = 'sameboy_libretro.dll'
+core = 'sameboy_libretro.so' if sys.platform == 'linux' else 'sameboy_libretro.dll'
 rom = 'demo.gb' # Source of demo.gb rom: https://buildbot.libretro.com/assets/cores/Nintendo%20-%20GameBoy
 ###
 
